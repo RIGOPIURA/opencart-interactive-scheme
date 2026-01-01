@@ -32,7 +32,7 @@
      PRIMARY KEY (`product_id`)
    ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-   Модифікатор: Завантажте файл install.xml через меню Extensions > Extension Installer.
+   Модифікатор: Завантажте файл parts_scheme_pro_v1.1_final.ocmod.zip через меню Extensions > Extension Installer.
 
     Оновлення: Перейдіть у Extensions > Modifications та натисніть кнопку Refresh.
 
