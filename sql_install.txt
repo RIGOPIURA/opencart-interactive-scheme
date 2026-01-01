@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS `oc_product_scheme` (
+  `product_id` int(11) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `scheme_data` text,
+  `replace_main` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`product_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;

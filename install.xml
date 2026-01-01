@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Interactive Spare Parts Scheme V1.0</name>
+    <code>parts_scheme_pro_v1.0_final</code>
+    <version>1.0</version>
+    <author>Mhack and AI</author>
+    <link>https://opencartforum.com/profile/980825-mhack/</link>
+    <file path="admin/controller/catalog/product.php">
+        <operation>
+            <search><![CDATA[if (isset($this->request->post['product_related'])) {]]></search>
+            <add position="before"><![CDATA[
+        $this->load->model('tool/image');
+        $this->load->model('catalog/product');
+    
+        $scheme_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_scheme WHERE product_id = '" . (int)($this->request->get['product_id'] ?? 0) . "'");
+        $scheme_info = $scheme_query->row;
+        $data['scheme_image'] = $this->request->post['scheme_image'] ?? ($scheme_info['image'] ?? '');
+        $data['scheme_replace_main'] = $this->request->post['scheme_replace_main'] ?? ($scheme_info['replace_main'] ?? 0);
+    
+        if ($data['scheme_image'] && is_file(DIR_IMAGE . $data['scheme_image'])) {
+            $data['thumb_scheme'] = $this->model_tool_image->resize($data['scheme_image'], 100, 100);
+            $data['main_scheme_preview'] = $this->model_tool_image->resize($data['scheme_image'], 800, 600);
+        } else {
+            $data['thumb_scheme'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+            $data['main_scheme_preview'] = $this->model_tool_image->resize('no_image.png', 800, 600);
+        }
+    
+        $scheme = [];
+        $raw_points = [];
+        if (isset($this->request->post['scheme_points'])) {
+            $raw_points = $this->request->post['scheme_points'];
+            $data['point_color_normal'] = $this->request->post['point_color_normal'] ?? '#28a745';
+            $data['point_color_active'] = $this->request->post['point_color_active'] ?? '#0056b3';
+            $data['row_highlight_color'] = $this->request->post['row_highlight_color'] ?? '#eef9ff';
+            $data['point_size_pc'] = $this->request->post['point_size_pc'] ?? 20;
+            $data['point_size_mobile'] = $this->request->post['point_size_mobile'] ?? 15;
+            $data['scheme_category_id'] = $this->request->post['scheme_category_id'] ?? 0;
+        } elseif (!empty($scheme_info['scheme_data'])) {
+            $scheme = json_decode($scheme_info['scheme_data'], true) ?? [];
+            $raw_points = $scheme['points'] ?? [];
+            $data['point_color_normal'] = $scheme['settings']['color_normal'] ?? '#28a745';
+            $data['point_color_active'] = $scheme['settings']['color_active'] ?? '#0056b3';
+            $data['row_highlight_color'] = $scheme['settings']['row_highlight'] ?? '#eef9ff';
+            $data['point_size_pc'] = $scheme['settings']['size_pc'] ?? 20;
+            $data['point_size_mobile'] = $scheme['settings']['size_mobile'] ?? 15;
+            $data['scheme_category_id'] = $scheme['settings']['category_id'] ?? 0;
+        } else {
+            $data['point_color_normal'] = '#28a745';
+            $data['point_color_active'] = '#0056b3';
+            $data['row_highlight_color'] = '#eef9ff';
+            $data['point_size_pc'] = 20;
+            $data['point_size_mobile'] = 15;
+            $data['scheme_category_id'] = 0;
+        }
+
+        $data['scheme_category_name'] = '';
+        if ($data['scheme_category_id']) {
+            $this->load->model('catalog/category');
+            $cat_info = $this->model_catalog_category->getCategory($data['scheme_category_id']);
+            if ($cat_info) {
+                $data['scheme_category_name'] = ($cat_info['path'] ? $cat_info['path'] . ' &gt; ' : '') . $cat_info['name'];
+            }
+        }
+    
+        $data['scheme_points'] = [];
+        foreach ($raw_points as $key => $point) {
+            $type = $point['type'] ?? 'product';
+            $rel_prod_name = '';
+            $point_data = [
+                'number' => $point['number'],
+                'type' => $type,
+                'x' => $point['x'],
+                'y' => $point['y'],
+                'shape' => $point['shape'] ?? 'round',
+                'product_id' => $point['product_id'] ?? 0,
+                'name' => $point['name'] ?? ''
+            ];
+        
+            if ($type == 'product') {
+                if ($point_data['product_id']) {
+                    $rel_prod = $this->model_catalog_product->getProduct($point_data['product_id']);
+                    if ($rel_prod) {
+                        $rel_prod_name = $rel_prod['name'];
+                        if (strpos($rel_prod['model'], 'custom-') === 0) {
+                            $point_data['type'] = 'custom';
+                            $point_data['price'] = $rel_prod['price'];
+                            $point_data['quantity'] = $rel_prod['quantity'];
+                            $point_data['image'] = $rel_prod['image'];
+                            if ($point_data['image'] && is_file(DIR_IMAGE . $point_data['image'])) {
+                                $point_data['thumb'] = $this->model_tool_image->resize($point_data['image'], 100, 100);
+                            } else {
+                                $point_data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+                            }
+                        }
+                    }
+                }
+                $point_data['name'] = $point['name'] ?? $rel_prod_name;
+            } elseif ($type == 'custom') {
+                $point_data['price'] = $point['price'] ?? 0;
+                $point_data['quantity'] = $point['quantity'] ?? 0;
+                $point_data['image'] = $point['image'] ?? '';
+                if ($point_data['image'] && is_file(DIR_IMAGE . $point_data['image'])) {
+                    $point_data['thumb'] = $this->model_tool_image->resize($point_data['image'], 100, 100);
+                } else {
+                    $point_data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+                }
+            }
+        
+            $data['scheme_points'][] = $point_data;
+        }
+        $data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[if (isset($data['product_related'])) {]]></search>
+            <add position="before"><![CDATA[
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_scheme WHERE product_id = '" . (int)$product_id . "'");
+        if (!empty($data['scheme_image'])) {
+            $this->load->model('localisation/language');
+            $languages = $this->model_localisation_language->getLanguages();
+            $product_info = $this->getProduct($product_id);
+            foreach ($data['scheme_points'] as &$point) {
+                if ($point['type'] == 'custom') {
+                    $product_description = [];
+                    foreach ($languages as $language) {
+                        $product_description[$language['language_id']] = [
+                            'name' => $point['name'],
+                            'description' => 'Custom part',
+                            'meta_title' => $point['name'],
+                            'meta_description' => '',
+                            'meta_keyword' => '',
+                            'tag' => ''
+                        ];
+                    }
+                    $custom_data = [
+                        'product_description' => $product_description,
+                        'model' => ($point['product_id'] ? $this->getProduct($point['product_id'])['model'] : 'custom-' . $product_id . '-' . $point['number']),
+                        'sku' => '',
+                        'upc' => '',
+                        'ean' => '',
+                        'jan' => '',
+                        'isbn' => '',
+                        'mpn' => '',
+                        'location' => '',
+                        'quantity' => (int)$point['quantity'],
+                        'stock_status_id' => 5, // In Stock
+                        'image' => $point['image'],
+                        'manufacturer_id' => 0,
+                        'shipping' => $product_info['shipping'],
+                        'price' => (float)$point['price'],
+                        'points' => 0,
+                        'tax_class_id' => $product_info['tax_class_id'],
+                        'date_available' => date('Y-m-d'),
+                        'weight' => 0,
+                        'weight_class_id' => 1,
+                        'length' => 0,
+                        'width' => 0,
+                        'height' => 0,
+                        'length_class_id' => 1,
+                        'subtract' => 1,
+                        'minimum' => 1,
+                        'sort_order' => 1,
+                        'status' => 1,
+                        'viewed' => 0,
+                        'product_store' => $this->getProductStores($product_id) ?: [0],
+                        'keyword' => '',
+                        'product_attribute' => [],
+                        'product_discount' => [],
+                        'product_filter' => [],
+                        'product_image' => [],
+                        'product_option' => [],
+                        'product_related' => [],
+                        'product_reward' => [],
+                        'product_special' => [],
+                        'product_category' => (!empty($data['scheme_category_id']) ? [(int)$data['scheme_category_id']] : []),
+                        'product_download' => [],
+                        'product_layout' => [],
+                        'product_recurring' => []
+                    ];
+                    if ($point['product_id']) {
+                        $custom_data['product_id'] = $point['product_id'];
+                        $this->editProduct($point['product_id'], $custom_data);
+                    } else {
+                        $point['product_id'] = $this->addProduct($custom_data);
+                    }
+                    $point['type'] = 'product';
+                    unset($point['name'], $point['price'], $point['quantity'], $point['image']);
+                }
+            }
+            unset($point);
+            $settings = [
+                'color_normal' => $data['point_color_normal'] ?? '#28a745',
+                'color_active' => $data['point_color_active'] ?? '#0056b3',
+                'row_highlight' => $data['row_highlight_color'] ?? '#eef9ff',
+                'size_pc' => (int)($data['point_size_pc'] ?? 20),
+                'size_mobile' => (int)($data['point_size_mobile'] ?? 15),
+                'category_id' => (int)($data['scheme_category_id'] ?? 0)
+            ];
+            $scheme_data = ['settings' => $settings, 'points' => $data['scheme_points'] ?? []];
+            $scheme_json = json_encode($scheme_data);
+            $replace_main = isset($data['scheme_replace_main']) ? (int)$data['scheme_replace_main'] : 0;
+            $this->db->query("INSERT INTO " . DB_PREFIX . "product_scheme SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($data['scheme_image']) . "', scheme_data = '" . $this->db->escape($scheme_json) . "', replace_main = '" . (int)$replace_main . "'");
+        }
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/catalog/product_form.twig">
+        <operation>
+            <search><![CDATA[<li><a href="#tab-design" data-toggle="tab">{{ tab_design }}</a></li>]]></search>
+            <add position="before"><![CDATA[<li><a href="#tab-scheme" data-toggle="tab">Схема запчастин</a></li>]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[<div class="tab-pane" id="tab-design">]]></search>
+            <add position="before"><![CDATA[
+            <div class="tab-pane" id="tab-scheme">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Головне фото схеми</label>
+                    <div class="col-sm-10">
+                        <a href="" id="thumb-scheme" data-toggle="image" class="img-thumbnail"><img src="{{ thumb_scheme }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                        <input type="hidden" name="scheme_image" value="{{ scheme_image }}" id="input-scheme-image" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Замінити тільки блок фото?</label>
+                    <div class="col-sm-10">
+                        <label class="radio-inline"><input type="radio" name="scheme_replace_main" value="1" {% if scheme_replace_main %}checked="checked"{% endif %} /> Так</label>
+                        <label class="radio-inline"><input type="radio" name="scheme_replace_main" value="0" {% if not scheme_replace_main %}checked="checked"{% endif %} /> Ні</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Колір точок (звичайний)</label>
+                    <div class="col-sm-10">
+                        <input type="color" name="point_color_normal" value="{{ point_color_normal }}" class="form-control" style="width: 100px;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Колір точок (активний/наведений)</label>
+                    <div class="col-sm-10">
+                        <input type="color" name="point_color_active" value="{{ point_color_active }}" class="form-control" style="width: 100px;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Колір виділення рядка в таблиці</label>
+                    <div class="col-sm-10">
+                        <input type="color" name="row_highlight_color" value="{{ row_highlight_color }}" class="form-control" style="width: 100px;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Розмір точок на ПК (px)</label>
+                    <div class="col-sm-10">
+                        <input type="number" name="point_size_pc" value="{{ point_size_pc }}" min="10" max="50" class="form-control" style="width: 100px;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Розмір точок на мобільних (px)</label>
+                    <div class="col-sm-10">
+                        <input type="number" name="point_size_mobile" value="{{ point_size_mobile }}" min="10" max="50" class="form-control" style="width: 100px;" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-scheme-category">Категорія для нових запчастин</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="scheme_category_name" value="{{ scheme_category_name }}" placeholder="Почніть вводити назву..." id="input-scheme-category" class="form-control" />
+                        <input type="hidden" name="scheme_category_id" value="{{ scheme_category_id }}" />
+                        <div id="scheme-category" class="well well-sm" style="height: 50px; overflow: auto; margin-top: 5px;">
+                            {% if scheme_category_id %}
+                                <div><i class="fa fa-minus-circle"></i> {{ scheme_category_name }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-7">
+                        <div style="position: relative; display: inline-block; border: 1px solid #ddd;" id="scheme-container">
+                             <img src="{{ main_scheme_preview }}" id="scheme-big-image" style="max-width: 100%; cursor: crosshair;">
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div style="max-height: 600px; overflow-y: auto;">
+                            <table id="scheme-table" class="table table-bordered">
+                                <thead><tr><th width="50">№</th><th width="120">Варіант</th><th>Деталі</th><th width="100">Форма</th><th style="display:none;"></th><th width="50">Дія</th></tr></thead>
+                                <tbody>
+                                    {% set point_row = 0 %}
+                                    {% for point in scheme_points %}
+                                    <tr id="point-row{{ point_row }}">
+                                        <td><input type="text" name="scheme_points[{{ point_row }}][number]" value="{{ point.number }}" class="form-control input-sm" onkeyup="renderAdminPoints()" /></td>
+                                        <td>
+                                            <select name="scheme_points[{{ point_row }}][type]" class="form-control input-sm" onchange="changePointType({{ point_row }})">
+                                                <option value="product" {% if point.type == 'product' %}selected{% endif %}>Вибір товару</option>
+                                                <option value="custom" {% if point.type == 'custom' %}selected{% endif %}>Власний товар</option>
+                                            </select>
+                                        </td>
+                                        <td id="point-row{{ point_row }}-details">
+                                            {% if point.type == 'custom' %}
+                                            <input type="text" name="scheme_points[{{ point_row }}][name]" value="{{ point.name }}" placeholder="Назва" class="form-control input-sm" />
+                                            <input type="number" name="scheme_points[{{ point_row }}][price]" value="{{ point.price }}" placeholder="Ціна" step="0.01" class="form-control input-sm" />
+                                            <input type="number" name="scheme_points[{{ point_row }}][quantity]" value="{{ point.quantity }}" placeholder="Кількість" class="form-control input-sm" />
+                                            <div class="image-upload">
+                                                <a href="" id="thumb-point{{ point_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ point.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                                                <input type="hidden" name="scheme_points[{{ point_row }}][image]" value="{{ point.image }}" id="input-point{{ point_row }}" />
+                                            </div>
+                                            <input type="hidden" name="scheme_points[{{ point_row }}][product_id]" value="{{ point.product_id }}" />
+                                            {% else %}
+                                            <input type="text" name="scheme_points[{{ point_row }}][name]" value="{{ point.name }}" class="form-control input-sm scheme-autocomplete" placeholder="Пошук товару" />
+                                            <input type="hidden" name="scheme_points[{{ point_row }}][product_id]" value="{{ point.product_id }}" />
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <select name="scheme_points[{{ point_row }}][shape]" class="form-control input-sm" onchange="renderAdminPoints()">
+                                                <option value="round" {% if point.shape == 'round' %}selected{% endif %}>Кругла</option>
+                                                <option value="square" {% if point.shape == 'square' %}selected{% endif %}>Квадратна</option>
+                                            </select>
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" name="scheme_points[{{ point_row }}][x]" value="{{ point.x }}" class="point-x" />
+                                            <input type="hidden" name="scheme_points[{{ point_row }}][y]" value="{{ point.y }}" class="point-y" />
+                                        </td>
+                                        <td><button type="button" onclick="$('#point-row{{ point_row }}').remove(); renderAdminPoints();" class="btn btn-danger btn-sm"><i class="fa fa-minus-circle"></i></button></td>
+                                    </tr>
+                                    {% set point_row = point_row + 1 %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                var point_row = {{ point_row }};
+                
+                $('input[name=\'scheme_category_name\']').autocomplete({
+                    'source': function(request, response) {
+                        $.ajax({
+                            url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                            dataType: 'json',
+                            success: function(json) {
+                                response($.map(json, function(item) {
+                                    return { label: item['name'], value: item['category_id'] }
+                                }));
+                            }
+                        });
+                    },
+                    'select': function(item) {
+                        $('input[name=\'scheme_category_name\']').val('');
+                        $('input[name=\'scheme_category_id\']').val(item['value']);
+                        $('#scheme-category').html('<div><i class="fa fa-minus-circle"></i> ' + item['label'] + '</div>');
+                    }
+                });
+
+                $('#scheme-category').delegate('.fa-minus-circle', 'click', function() {
+                    $(this).parent().remove();
+                    $('input[name=\'scheme_category_id\']').val('');
+                });
+
+                function colorToRgba(color, alpha) {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = canvas.height = 1;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = color;
+                    ctx.fillRect(0, 0, 1, 1);
+                    var data = ctx.getImageData(0, 0, 1, 1).data;
+                    return 'rgba(' + data[0] + ',' + data[1] + ',' + data[2] + ',' + alpha + ')';
+                }
+                function renderAdminPoints() {
+                    $('.admin-point-marker').remove();
+                    var color = $('input[name="point_color_normal"]').val();
+                    var size = $('input[name="point_size_pc"]').val();
+                    var sizePx = size + 'px';
+                    var fontSize = (size / 2) + 'px';
+                    var lineHeight = sizePx;
+                    $('#scheme-table tbody tr').each(function() {
+                        var x = $(this).find('.point-x').val();
+                        var y = $(this).find('.point-y').val();
+                        var num = $(this).find('input[name*="[number]"]').val();
+                        var shape = $(this).find('select[name*="[shape]"]').val();
+                        var style = 'position:absolute; left:'+x+'%; top:'+y+'%; height:'+sizePx+'; background:'+colorToRgba(color, 0.7)+'; border:1px solid white; text-align:center; color:#fff; font-size:'+fontSize+'; line-height:'+lineHeight+'; transform:translate(-50%, -50%); pointer-events:none; z-index:10; box-sizing:border-box; display:flex; align-items:center; justify-content:center;';
+                        if (shape === 'round') {
+                            style += 'width:'+sizePx+'; border-radius:50%;';
+                        } else {
+                            style += 'width:auto; min-width:'+sizePx+'; border-radius:4px; padding:0 5px;';
+                        }
+                        $('#scheme-container').append('<div class="admin-point-marker" style="'+style+'">'+num+'</div>');
+                    });
+                }
+                $('input[name="point_color_normal"], input[name="point_size_pc"]').on('input change', renderAdminPoints);
+                $('input[name="point_color_active"], input[name="row_highlight_color"], input[name="point_size_mobile"]').on('input change', function(){});
+                $('#scheme-big-image').on('click', function(e) {
+                    var offset = $(this).offset();
+                    var px = ((e.pageX - offset.left) / $(this).width()) * 100;
+                    var py = ((e.pageY - offset.top) / $(this).height()) * 100;
+                    addPointRow(px.toFixed(2), py.toFixed(2));
+                });
+                function addPointRow(x, y) {
+                    var html = '<tr id="point-row' + point_row + '">';
+                    html += '<td><input type="text" name="scheme_points['+point_row+'][number]" value="'+(point_row+1)+'" class="form-control input-sm" onkeyup="renderAdminPoints()" /></td>';
+                    html += '<td><select name="scheme_points['+point_row+'][type]" class="form-control input-sm" onchange="changePointType('+point_row+')"><option value="product" selected>Вибір товару</option><option value="custom">Власний товар</option></select></td>';
+                    html += '<td id="point-row'+point_row+'-details">';
+                    html += '<input type="text" name="scheme_points['+point_row+'][name]" class="form-control input-sm scheme-autocomplete" placeholder="Пошук товару" />';
+                    html += '<input type="hidden" name="scheme_points['+point_row+'][product_id]" value="0" />';
+                    html += '</td>';
+                    html += '<td><select name="scheme_points['+point_row+'][shape]" class="form-control input-sm" onchange="renderAdminPoints()"><option value="round" selected>Кругла</option><option value="square">Квадратна</option></select></td>';
+                    html += '<td style="display:none;"><input type="hidden" name="scheme_points['+point_row+'][x]" value="'+x+'" class="point-x" /><input type="hidden" name="scheme_points['+point_row+'][y]" value="'+y+'" class="point-y" /></td>';
+                    html += '<td><button type="button" onclick="$(\'#point-row'+point_row+'\').remove(); renderAdminPoints();" class="btn btn-danger btn-sm"><i class="fa fa-minus-circle"></i></button></td>';
+                    html += '</tr>';
+                    $('#scheme-table tbody').append(html);
+                    bindAutocomplete(point_row);
+                    point_row++;
+                    renderAdminPoints();
+                }
+                function changePointType(row) {
+                    var type = $('select[name="scheme_points['+row+'][type]"]').val();
+                    var html = '';
+                    if (type == 'product') {
+                        html += '<input type="text" name="scheme_points['+row+'][name]" class="form-control input-sm scheme-autocomplete" placeholder="Пошук товару" />';
+                        html += '<input type="hidden" name="scheme_points['+row+'][product_id]" value="0" />';
+                    } else if (type == 'custom') {
+                        html += '<input type="text" name="scheme_points['+row+'][name]" placeholder="Назва" class="form-control input-sm" />';
+                        html += '<input type="number" name="scheme_points['+row+'][price]" placeholder="Ціна" step="0.01" class="form-control input-sm" />';
+                        html += '<input type="number" name="scheme_points['+row+'][quantity]" placeholder="Кількість" class="form-control input-sm" />';
+                        html += '<div class="image-upload">';
+                        html += '<a href="" id="thumb-point'+row+'" data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>';
+                        html += '<input type="hidden" name="scheme_points['+row+'][image]" value="" id="input-point'+row+'" />';
+                        html += '</div>';
+                        html += '<input type="hidden" name="scheme_points['+row+'][product_id]" value="0" />';
+                    }
+                    $('#point-row'+row+'-details').html(html);
+                    if (type == 'product') {
+                        bindAutocomplete(row);
+                    }
+                }
+                function bindAutocomplete(r) {
+                    $('input[name=\'scheme_points['+r+'][name]\']').autocomplete({
+                        'source': function(request, response) {
+                            $.ajax({
+                                url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name='+encodeURIComponent(request),
+                                dataType:'json',
+                                success: function(json) { response($.map(json, function(item) { return {label: item['name'], value: item['product_id']}})); }
+                            });
+                        },
+                        'select': function(item) {
+                            $('input[name=\'scheme_points['+r+'][name]\']').val(item['label']);
+                            $('input[name=\'scheme_points['+r+'][product_id]\']').val(item['value']);
+                        }
+                    });
+                }
+                $('#scheme-table tbody tr').each(function() {
+                    var id = $(this).attr('id').replace('point-row', '');
+                    var type = $('select[name="scheme_points['+id+'][type]"]').val();
+                    if (type == 'product') {
+                        bindAutocomplete(id);
+                    }
+                });
+                renderAdminPoints();
+                </script>
+            </div>
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/product/product.php">
+        <operation>
+            <search><![CDATA[$data['products'] = array();]]></search>
+            <add position="before"><![CDATA[
+            $data['scheme_points'] = array();
+            $data['scheme_image'] = false;
+            $data['scheme_replace_main'] = 0;
+            $data['scheme_currency_left'] = $this->currency->getSymbolLeft($this->session->data['currency']);
+            $data['scheme_currency_right'] = $this->currency->getSymbolRight($this->session->data['currency']);
+        
+            $sq = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_scheme WHERE product_id = '" . (int)$product_id . "'");
+        
+            if ($sq->num_rows && $sq->row['image']) {
+                $this->load->model('tool/image');
+                $data['scheme_image'] = $this->model_tool_image->resize($sq->row['image'], 1140, 855);
+                $data['scheme_popup'] = $this->model_tool_image->resize($sq->row['image'], 1600, 1200);
+                $data['scheme_replace_main'] = (int)$sq->row['replace_main'];
+            
+                $scheme = json_decode($sq->row['scheme_data'], true);
+                $settings = $scheme['settings'] ?? [];
+                $hex_normal = $settings['color_normal'] ?? '#28a745';
+                $hex_normal = str_replace('#', '', $hex_normal);
+                if (strlen($hex_normal) == 3) {
+                    $hex_normal = str_repeat(substr($hex_normal, 0, 1), 2) . str_repeat(substr($hex_normal, 1, 1), 2) . str_repeat(substr($hex_normal, 2, 1), 2);
+                }
+                $r = hexdec(substr($hex_normal, 0, 2));
+                $g = hexdec(substr($hex_normal, 2, 2));
+                $b = hexdec(substr($hex_normal, 4, 2));
+                $data['point_color_normal_rgb'] = $r . ',' . $g . ',' . $b;
+                $hex_active = $settings['color_active'] ?? '#0056b3';
+                $hex_active = str_replace('#', '', $hex_active);
+                if (strlen($hex_active) == 3) {
+                    $hex_active = str_repeat(substr($hex_active, 0, 1), 2) . str_repeat(substr($hex_active, 1, 1), 2) . str_repeat(substr($hex_active, 2, 1), 2);
+                }
+                $r = hexdec(substr($hex_active, 0, 2));
+                $g = hexdec(substr($hex_active, 2, 2));
+                $b = hexdec(substr($hex_active, 4, 2));
+                $data['point_color_active_rgb'] = $r . ',' . $g . ',' . $b;
+                $data['row_highlight_color'] = $settings['row_highlight'] ?? '#eef9ff';
+                $data['point_size_pc'] = $settings['size_pc'] ?? 20;
+                $data['point_size_mobile'] = $settings['size_mobile'] ?? 15;
+            
+                $pts = $scheme['points'] ?? [];
+                if ($pts) {
+                    foreach ($pts as $key => $p) {
+                        $pi = null;
+                        if (!empty($p['product_id'])) {
+                            $pi = $this->model_catalog_product->getProduct($p['product_id']);
+                        }
+                        $thumb = $this->model_tool_image->resize('no_image.png', 50, 50);
+                        $popup = $this->model_tool_image->resize('no_image.png', 800, 600);
+                        $name = '';
+                        $price_val = 0;
+                        $price_txt = '';
+                        $stock = 0;
+                        $href = '';
+                        $id = '';
+                        if ($pi) {
+                            $id = $pi['product_id'];
+                            $name = $pi['name'];
+                            $price_val = $this->tax->calculate($pi['special'] ? $pi['special'] : $pi['price'], $pi['tax_class_id'], $this->config->get('config_tax'));
+                            $price_txt = $this->currency->format($price_val, $this->session->data['currency']);
+                            $stock = (int)$pi['quantity'];
+                            $href = $this->url->link('product/product', 'product_id=' . $pi['product_id']);
+                            if ($pi['image']) {
+                                $thumb = $this->model_tool_image->resize($pi['image'], 50, 50);
+                                $popup = $this->model_tool_image->resize($pi['image'], 800, 600);
+                            }
+                        }
+                        $data['scheme_points'][] = array(
+                            'id' => $id,
+                            'product_id' => $id,
+                            'name' => $name,
+                            'price_text' => $price_txt,
+                            'price_raw' => $price_val,
+                            'stock' => $stock,
+                            'href' => $href,
+                            'number' => $p['number'],
+                            'x' => $p['x'],
+                            'y' => $p['y'],
+                            'shape' => $p['shape'] ?? 'round',
+                            'thumb' => $thumb,
+                            'popup' => $popup
+                        );
+                    }
+                }
+                usort($data['scheme_points'], function($a, $b) { return (int)$a['number'] - (int)$b['number']; });
+            }
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/*/template/product/product.twig">
+        <operation>
+            <search><![CDATA[{{ description }}]]></search>
+            <add position="before"><![CDATA[
+{% if scheme_image %}
+<div id="product-scheme-section" style="margin-top:30px; clear:both;">
+    <h3 class="scheme-title">Схема запчастин</h3>
+    <div class="scheme-map-container" style="position: relative; border: 1px solid #ddd; background: #fff; margin-bottom: 20px; max-width: 100%;">
+        {% if scheme_replace_main %}
+             <img src="{{ scheme_image }}" class="img-responsive" style="width:100%;">
+        {% else %}
+             <a href="{{ scheme_popup }}" class="scheme-popup-link"><img src="{{ scheme_image }}" class="img-responsive" style="width:100%;"></a>
+        {% endif %}
+    
+        {% for point in scheme_points %}
+        <div class="scheme-marker {{ point.shape }}" data-id="{{ point.id }}" style="left: {{ point.x }}%; top: {{ point.y }}%;">{{ point.number }}</div>
+        {% endfor %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered scheme-parts-table">
+            <thead>
+                <tr style="background:#f5f5f5;">
+                    <th class="text-center">Фото</th>
+                    <th>Варіанти</th>
+                    <th class="text-center">Ціна</th>
+                    <th class="text-center">К-ть</th>
+                    <th>Купити</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for point in scheme_points %}
+                <tr class="scheme-row" data-id="{{ point.id }}" id="row-{{ point.id }}">
+                    <td class="text-center" width="70">
+                        {% if point.popup %}
+                        <a href="{{ point.popup }}" class="popup-thumb"><img src="{{ point.thumb }}" class="img-thumbnail" width="50" height="50"></a>
+                        {% else %}
+                        <img src="{{ point.thumb }}" class="img-thumbnail" width="50" height="50">
+                        {% endif %}
+                    </td>
+                    <td style="vertical-align: middle;">
+                        <div style="font-weight:bold; color:#333; font-size: 14px;">{{ point.number }} {{ point.name }}</div>
+                    </td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        {% if point.price_raw > 0 %}
+                            <div class="price-val" data-unit-price="{{ point.price_raw }}" style="font-size:15px; font-weight:bold;">{{ point.price_text }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-center" width="80" style="vertical-align: middle;">
+                        {% if point.stock > 0 and point.id %}
+                            <input type="number" value="1" min="1" max="{{ point.stock }}" class="form-control input-sm part-qty" style="text-align: center;" data-id="{{ point.id }}">
+                            <div class="qty-error" style="color:red; font-size:10px; display:none; white-space:nowrap; margin-top:2px;">Макс: {{ point.stock }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-center" width="70" style="vertical-align: middle;">
+                        {% if point.stock > 0 and point.id %}
+                            <button type="button" onclick="schemeAddCart(this, '{{ point.id }}');" class="btn btn-primary btn-sm scheme-buy-btn" style="border-radius: 4px;"><i class="fa fa-shopping-cart"></i></button>
+                        {% else %}
+                             <span style="font-size: 11px; color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+.scheme-marker { position: absolute; background: rgba({{ point_color_normal_rgb }},0.7); border: 1px solid white; text-align: center; color: #fff; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; box-shadow: 0 1px 3px rgba(0,0,0,0.3); box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.scheme-marker:hover, .scheme-marker.active { background: rgba({{ point_color_active_rgb }},0.7); border-color: white; z-index: 10; transform: translate(-50%, -50%) scale(1.2); }
+.scheme-marker.round { width: {{ point_size_pc }}px; height: {{ point_size_pc }}px; font-size: {{ point_size_pc / 2 }}px; line-height: {{ point_size_pc }}px; border-radius: 50%; }
+.scheme-marker.square { width: auto; min-width: {{ point_size_pc }}px; height: {{ point_size_pc }}px; padding: 0 5px; font-size: {{ point_size_pc / 2 }}px; line-height: {{ point_size_pc }}px; border-radius: 4px; }
+.scheme-row.active td { background: {{ row_highlight_color }} !important; }
+.scheme-parts-table td { vertical-align: middle !important; }
+.scheme-parts-table { table-layout: fixed; width: 100%; }
+.scheme-parts-table td:nth-child(2), .scheme-parts-table td:nth-child(3) { word-break: break-word; white-space: normal !important; }
+@media (max-width: 767px) {
+    .scheme-marker.round { width: {{ point_size_mobile }}px; height: {{ point_size_mobile }}px; font-size: {{ point_size_mobile / 2 }}px; line-height: {{ point_size_mobile }}px; }
+    .scheme-marker.square { min-width: {{ point_size_mobile }}px; height: {{ point_size_mobile }}px; padding: 0 5px; font-size: {{ point_size_mobile / 2 }}px; line-height: {{ point_size_mobile }}px; }
+    .scheme-parts-table td:nth-child(2), .scheme-parts-table td:nth-child(3) { word-break: break-word; white-space: normal !important; }
+}
+</style>
+<script>
+function schemeAddCart(btn, id) {
+    var $row = $(btn).closest('tr');
+    var $input = $row.find('.part-qty');
+    var val = parseInt($input.val());
+    var max = parseInt($input.attr('max'));
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > max) {
+        val = max;
+        $input.val(max);
+        $row.find('.qty-error').show().fadeOut(3000);
+    }
+    cart.add(id, val);
+}
+$(document).ready(function() {
+    var currency_left = '{{ scheme_currency_left }}';
+    var currency_right = '{{ scheme_currency_right }}';
+ 
+    {% if scheme_replace_main %}
+        var $visual = $('.scheme-map-container').detach();
+        var $target = $('.thumbnails, .product-images, .image-container').first();
+        if ($target.length == 0) $target = $('#content .row').children('div[class*="col-"]:first');
+        if($target.length) {
+            $target.html($visual);
+            $visual.css({ 'width': '100%', 'max-width': '100%', 'border': 'none', 'margin-bottom': '0' });
+            $('.scheme-title').hide();
+        }
+    {% endif %}
+    if (typeof $.fn.magnificPopup !== 'undefined') {
+        $('.scheme-popup-link, .popup-thumb').magnificPopup({type:'image'});
+    }
+    $('.scheme-marker').on('click', function() {
+        var id = $(this).data('id');
+        $('.scheme-marker, .scheme-row').removeClass('active');
+        $(this).addClass('active');
+        var $row = $('#row-' + id);
+        if($row.length) {
+            $row.addClass('active');
+            window.scrollTo({ top: $row.offset().top - 120, behavior: 'smooth' });
+        }
+    });
+    $('.part-qty').on('input', function() {
+        var $this = $(this);
+        var val = parseInt($this.val());
+        var max = parseInt($this.attr('max'));
+        var $err = $this.siblings('.qty-error');
+        var $btn = $this.closest('tr').find('.scheme-buy-btn');
+        var $price = $this.closest('tr').find('.price-val');
+        var unit = parseFloat($price.data('unit-price'));
+        if (!isNaN(unit) && !isNaN(val) && val >= 1) {
+            var total = unit * val;
+            var total_str = (total % 1 === 0) ? total.toFixed(0) : total.toFixed(2);
+            var formatted = currency_left + total_str + currency_right;
+            $price.text(formatted);
+        }
+        if(val > max || val < 1 || isNaN(val)) {
+            $err.text('Макс: ' + max).show();
+            $btn.prop('disabled', true);
+        } else {
+            $err.hide();
+            $btn.prop('disabled', false);
+        }
+    });
+    $('.part-qty').on('blur', function() {
+        var $this = $(this);
+        var val = parseInt($this.val());
+        var max = parseInt($this.attr('max'));
+        var $err = $this.siblings('.qty-error');
+        var $btn = $this.closest('tr').find('.scheme-buy-btn');
+        var $price = $this.closest('tr').find('.price-val');
+        var unit = parseFloat($price.data('unit-price'));
+        if (isNaN(val) || val < 1) {
+            val = 1;
+            $this.val(1);
+            $err.hide();
+            $btn.prop('disabled', false);
+        } else if (val > max) {
+            val = max;
+            $this.val(max);
+            $err.text('Макс: ' + max).show().fadeOut(3000);
+            $btn.prop('disabled', false);
+        }
+        if (!isNaN(unit)) {
+            var total = unit * val;
+            var total_str = (total % 1 === 0) ? total.toFixed(0) : total.toFixed(2);
+            var formatted = currency_left + total_str + currency_right;
+            $price.text(formatted);
+        }
+    });
+});
+</script>
+{% endif %}
+]]></add>
+        </operation>
+    </file>
+</modification>
