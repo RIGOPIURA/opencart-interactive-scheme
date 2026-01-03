@@ -550,7 +550,7 @@
     </file>
     <file path="catalog/view/theme/*/template/product/product.twig">
         <operation>
-            <search><![CDATA[<ul class="nav nav-tabs">]]></search>
+            <search><![CDATA[{{ description }}]]></search>
             <add position="before"><![CDATA[
 {% if scheme_image %}
 <div id="product-scheme-section" style="margin-top:30px; clear:both;">
@@ -726,3 +726,4 @@ $(document).ready(function() {
         </operation>
     </file>
 </modification>
+
