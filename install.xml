@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modification>
-    <name>Interactive Spare Parts Scheme V1.0</name>
-    <code>parts_scheme_pro_v1.0_final</code>
-    <version>1.0</version>
+    <name>Interactive Spare Parts Scheme V1.2</name>
+    <code>parts_scheme_pro_v1.2_final</code>
+    <version>1.2</version>
     <author>Mhack and AI</author>
     <link>https://opencartforum.com/profile/980825-mhack/</link>
     <file path="admin/controller/catalog/product.php">
@@ -550,7 +550,7 @@
     </file>
     <file path="catalog/view/theme/*/template/product/product.twig">
         <operation>
-            <search><![CDATA[{{ description }}]]></search>
+            <search><![CDATA[<ul class="nav nav-tabs">]]></search>
             <add position="before"><![CDATA[
 {% if scheme_image %}
 <div id="product-scheme-section" style="margin-top:30px; clear:both;">
@@ -615,6 +615,7 @@
     </div>
 </div>
 <style>
+.scheme-map-container { max-width: 100%; overflow: hidden; }
 .scheme-marker { position: absolute; background: rgba({{ point_color_normal_rgb }},0.7); border: 1px solid white; text-align: center; color: #fff; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; box-shadow: 0 1px 3px rgba(0,0,0,0.3); box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 .scheme-marker:hover, .scheme-marker.active { background: rgba({{ point_color_active_rgb }},0.7); border-color: white; z-index: 10; transform: translate(-50%, -50%) scale(1.2); }
 .scheme-marker.round { width: {{ point_size_pc }}px; height: {{ point_size_pc }}px; font-size: {{ point_size_pc / 2 }}px; line-height: {{ point_size_pc }}px; border-radius: 50%; }
@@ -652,8 +653,8 @@ $(document).ready(function() {
         var $target = $('.thumbnails, .product-images, .image-container').first();
         if ($target.length == 0) $target = $('#content .row').children('div[class*="col-"]:first');
         if($target.length) {
-            $target.html($visual);
-            $visual.css({ 'width': '100%', 'max-width': '100%', 'border': 'none', 'margin-bottom': '0' });
+            $target.replaceWith($visual);
+            $visual.css({ 'max-width': '100%', 'border': 'none', 'margin-bottom': '0', 'overflow': 'hidden' });
             $('.scheme-title').hide();
         }
     {% endif %}
